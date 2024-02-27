@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  backend:  # Renaming 'server' to 'backend'
+    build:
+      context: ./backend  # Changed context to 'backend'
+      dockerfile: Dockerfile
+    image: myapp-server
+    container_name: myapp-node-server
+    command: /usr/src/app/node_modules/.bin/nodemon server.js
+    volumes:
+      - ./backend/:/usr/src/app  # Changed path to 'backend'
+      - /usr/src/app/node_modules
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    env_file: ./backend/.env  # Changed path to 'backend'
+    environment:
+      - NODE_ENV=development
+    networks:
+      - app-network
+
+  mongo:
+    image: mongo
+    volumes:
+      - data-volume:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - app-network
+
+  frontend:  # Renaming 'client' to 'frontend'
+    build:
+      context: ./frontend  # Changed context to 'frontend'
+      dockerfile: Dockerfile
+    image: react-app
+    container_name: myapp-react-client
+    command: npm start
+    volumes:
+      - ./frontend/:/usr/app  # Changed path to 'frontend'
+      - /usr/app/node_modules
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  data-volume:
+  node_modules:
